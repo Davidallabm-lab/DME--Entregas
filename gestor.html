@@ -69,8 +69,11 @@
       </div>
 
       <div id="aba-frota" class="aba">
-        <div style="margin-bottom:1rem"><button class="btn btn-verde btn-sm" onclick="abrirModalVei()">+ Atualizar KM de veículo</button></div>
-        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Veículo</th><th>Placa</th><th>KM atual</th><th>KM revisão</th><th>KM restante</th><th>Motorista</th><th>Status</th></tr></thead><tbody id="frota-body"></tbody></table></div>
+        <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+          <button class="btn btn-verde btn-sm" onclick="abrirModalNovoVei()">+ Novo veículo</button>
+          <button class="btn btn-sec btn-sm" onclick="abrirModalVei()">Atualizar KM</button>
+        </div>
+        <div class="tabela-wrap"><table class="tabela"><thead><tr><th>Veículo</th><th>Placa</th><th>KM atual</th><th>KM revisão</th><th>KM restante</th><th>Motorista</th><th>Status</th><th>Ação</th></tr></thead><tbody id="frota-body"></tbody></table></div>
       </div>
 
       <div id="aba-usuarios" class="aba">
@@ -99,7 +102,7 @@
 <nav class="bottom-nav">
   <button class="bn ativo" data-aba="dashboard" onclick="abrirAba('dashboard',this)"><svg viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="2" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Dashboard</button>
   <button class="bn" data-aba="entregas" onclick="abrirAba('entregas',this)"><svg viewBox="0 0 22 22" fill="none"><path d="M3 6h16M3 11h10M3 16h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Entregas</button>
-  <button class="bn" data-aba="ocorrencias" onclick="abrirAba('ocorrencias',this)"><svg viewBox="0 0 22 22" fill="none"><path d="M11 2L2 19h18L11 2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 10v4M11 16v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Ocorr.</button>
+  <button class="bn" data-aba="frota" onclick="abrirAba('frota',this)"><svg viewBox="0 0 22 22" fill="none"><rect x="2" y="8" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M15 12l5-3v7l-5-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="6" cy="19" r="2" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="19" r="2" stroke="currentColor" stroke-width="1.4"/></svg>Frota</button>
   <button class="bn" data-aba="usuarios" onclick="abrirAba('usuarios',this)"><svg viewBox="0 0 22 22" fill="none"><circle cx="8" cy="7" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M2 20c0-4 2.7-6 6-6s6 2 6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M17 10v6M14 13h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Usuários</button>
   <button class="bn" data-aba="historico" onclick="abrirAba('historico',this)"><svg viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.6"/><path d="M11 7v4l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Histórico</button>
 </nav>
@@ -114,6 +117,21 @@
     <div class="modal-btns">
       <button class="btn btn-sec" onclick="fecharModal('modal-usr')">Cancelar</button>
       <button class="btn btn-verde" id="btn-salvar-usr" onclick="salvarUsuario()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO VEÍCULO -->
+<div id="modal-novo-vei" class="modal-bg">
+  <div class="modal">
+    <h3>Cadastrar novo veículo</h3>
+    <div class="campo"><label class="rotulo">Modelo</label><input type="text" id="novo-vei-modelo" class="entrada" placeholder="Ex: VW/8.150E DELIVERY"></div>
+    <div class="campo"><label class="rotulo">Placa</label><input type="text" id="novo-vei-placa" class="entrada" placeholder="Ex: ABC1D23" style="text-transform:uppercase"></div>
+    <div class="campo"><label class="rotulo">KM atual</label><input type="number" id="novo-vei-km" class="entrada" placeholder="Ex: 0" inputmode="numeric"></div>
+    <div class="campo"><label class="rotulo">KM próxima revisão</label><input type="number" id="novo-vei-rev" class="entrada" placeholder="Ex: 10000" inputmode="numeric"></div>
+    <div class="modal-btns">
+      <button class="btn btn-sec" onclick="fecharModal('modal-novo-vei')">Cancelar</button>
+      <button class="btn btn-verde" id="btn-salvar-vei" onclick="cadastrarVeiculo()">Cadastrar</button>
     </div>
   </div>
 </div>
@@ -288,8 +306,42 @@ async function renderFrota(){
     const rest=(v.km_revisao||10000)-(v.km||0)
     const al=rest<0?`<span style="color:var(--dr);font-weight:700">VENCIDA</span>`:rest<500?`<span style="color:var(--am)">Em ${rest} km</span>`:`<span style="color:var(--gn)">${rest.toLocaleString('pt-BR')} km</span>`
     const st=v.status==='em_uso'?'<span class="ponto p-am"></span>Em uso':'<span class="ponto p-vrd"></span>Disponível'
-    return`<tr><td><strong>${v.modelo}</strong></td><td style="font-family:monospace">${v.placa}</td><td>${(v.km||0).toLocaleString('pt-BR')} km</td><td>${(v.km_revisao||10000).toLocaleString('pt-BR')} km</td><td>${al}</td><td>${mot?mot.nome.split(' ')[0]:'—'}</td><td>${st}</td></tr>`
+    const podeExcluir=v.status!=='em_uso'
+    return`<tr><td><strong>${v.modelo}</strong></td><td style="font-family:monospace">${v.placa}</td><td>${(v.km||0).toLocaleString('pt-BR')} km</td><td>${(v.km_revisao||10000).toLocaleString('pt-BR')} km</td><td>${al}</td><td>${mot?mot.nome.split(' ')[0]:'—'}</td><td>${st}</td><td>${podeExcluir?`<button class="btn btn-sec btn-sm" style="color:var(--dr);border-color:var(--dr)" onclick="excluirVeiculo('${v._id}','${v.modelo} ${v.placa}')">Excluir</button>`:''}</td></tr>`
   }).join('')
+}
+
+window.abrirModalNovoVei=()=>{
+  ;['novo-vei-modelo','novo-vei-placa','novo-vei-km','novo-vei-rev'].forEach(id=>document.getElementById(id).value='')
+  document.getElementById('modal-novo-vei').classList.add('aberto')
+}
+
+window.cadastrarVeiculo=async()=>{
+  const modelo=document.getElementById('novo-vei-modelo').value.trim()
+  const placa=document.getElementById('novo-vei-placa').value.trim().toUpperCase()
+  const km=parseInt(document.getElementById('novo-vei-km').value)||0
+  const rev=parseInt(document.getElementById('novo-vei-rev').value)||10000
+  if(!modelo)return alert('Informe o modelo do veículo.')
+  if(!placa)return alert('Informe a placa do veículo.')
+  document.getElementById('btn-salvar-vei').disabled=true
+  await addDoc(collection(fdb,'veiculos'),{
+    modelo,placa,km,km_revisao:rev,
+    status:'disponivel',motorista_id:null,
+    criadoEm:serverTimestamp()
+  })
+  document.getElementById('btn-salvar-vei').disabled=false
+  fecharModal('modal-novo-vei')
+  renderFrota()
+  alert('Veículo '+modelo+' — '+placa+' cadastrado com sucesso!')
+}
+
+window.excluirVeiculo=async(id,nome)=>{
+  if(!confirm('Excluir o veículo '+nome+'?
+
+Esta ação não pode ser desfeita.'))return
+  const {deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')
+  await deleteDoc(doc(fdb,'veiculos',id))
+  renderFrota()
 }
 
 window.abrirModalVei=async()=>{
