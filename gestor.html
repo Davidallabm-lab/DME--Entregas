@@ -336,7 +336,7 @@ window.cadastrarVeiculo=async()=>{
 }
 
 window.excluirVeiculo=async(id,nome)=>{
-  if(!confirm('Excluir o veículo '+nome+'?\n\nEsta ação não pode ser desfeita.'))return
+ if(!confirm('Excluir o veículo '+nome+'?\n\nEsta ação não pode ser desfeita.'))return
   const {deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')
   await deleteDoc(doc(fdb,'veiculos',id))
   renderFrota()
