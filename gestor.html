@@ -336,7 +336,7 @@ window.cadastrarVeiculo=async()=>{
 }
 
 window.excluirVeiculo=async(id,nome)=>{
- if(!confirm('Excluir o veículo '+nome+'?\n\nEsta ação não pode ser desfeita.'))return
+  if(!confirm('Excluir o veículo '+nome+'?\n\nEsta ação não pode ser desfeita.'))return
   const {deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')
   await deleteDoc(doc(fdb,'veiculos',id))
   renderFrota()
@@ -375,9 +375,17 @@ async function renderUsuarios(p){
     const cor={gestor:'#8B2B2B',encarregado:'#BA7517',motorista:'#1D9E75'}[u.perfil]||'#888'
     const ini=u.nome.split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase()
     const d=document.createElement('div');d.className='usr-card'
-    d.innerHTML=`<div class="usr-av" style="background:${cor}">${ini}</div><div class="usr-info"><div class="usr-nome">${u.nome}</div><div class="usr-meta">${{gestor:'Gestor',encarregado:'Encarregado',motorista:'Motorista / Vendedor'}[u.perfil]} · ${u.ativo?'Ativo':'Inativo'}</div></div><div class="pin-badge">${u.pin}</div><button class="btn btn-sec btn-sm" onclick="editarUsr('${u._id}')">Editar</button>`
+    d.innerHTML=`<div class="usr-av" style="background:${cor}">${ini}</div><div class="usr-info"><div class="usr-nome">${u.nome}</div><div class="usr-meta">${{gestor:'Gestor',encarregado:'Encarregado',motorista:'Motorista / Vendedor'}[u.perfil]} · ${u.ativo?'Ativo':'Inativo'}</div></div><div class="pin-badge">${u.pin}</div><button class="btn btn-sec btn-sm" style="margin-right:4px" onclick="editarUsr('${u._id}')">Editar</button><button class="btn btn-sec btn-sm" style="color:var(--dr);border-color:var(--dr)" onclick="excluirUsr('${u._id}','${u.nome}')">Excluir</button>`
     lista.appendChild(d)
   })
+}
+
+window.excluirUsr=async(id,nome)=>{
+  if(!confirm('Excluir o usuário '+nome+'?\n\nEsta ação não pode ser desfeita.'))return
+  const {deleteDoc}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js')
+  await deleteDoc(doc(fdb,'usuarios',id))
+  renderUsuarios(filtroPerfil)
+  alert('Usuário removido com sucesso.')
 }
 
 window.filtrarUsr=(p,btn)=>{
