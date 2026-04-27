@@ -1,0 +1,15 @@
+{
+  "name": "DME Entregas",
+  "short_name": "DME",
+  "description": "Sistema de entregas DME Distribuidora de Material Elétrico",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#8B2B2B",
+  "theme_color": "#8B2B2B",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

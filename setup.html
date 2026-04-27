@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DME — Setup inicial</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;background:#F4F3F0;color:#1A1A18;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem}
+.card{background:white;border-radius:16px;padding:2rem;max-width:480px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.logo{width:52px;height:52px;background:#8B2B2B;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem}
+h1{font-size:20px;font-weight:700;margin-bottom:6px}
+.sub{font-size:13px;color:#9A9A94;margin-bottom:1.5rem;line-height:1.6}
+.btn{width:100%;height:52px;background:#8B2B2B;color:white;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
+.btn:hover{background:#5C1C1C}
+.btn:disabled{background:#ccc;cursor:not-allowed}
+.log{margin-top:1.25rem;background:#F4F3F0;border-radius:10px;padding:12px 14px;font-size:12px;font-family:monospace;max-height:300px;overflow-y:auto;display:none}
+.log-item{padding:3px 0;border-bottom:0.5px solid #E0DED8;line-height:1.5}
+.log-item:last-child{border-bottom:none}
+.ok{color:#085041}.er{color:#791F1F}.info{color:#633806}
+.resultado{margin-top:1rem;padding:14px;border-radius:10px;font-size:14px;font-weight:600;text-align:center;display:none}
+.resultado.sucesso{background:#E1F5EE;color:#085041}
+.resultado.erro{background:#FCEBEB;color:#791F1F}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <path d="M2 22V12l12-7 12 7v10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="9" y="14" width="10" height="8" rx="1.5" fill="white"/>
+    </svg>
+  </div>
+  <h1>Setup inicial — DME Entregas</h1>
+  <p class="sub">Este assistente cria todos os usuários, PINs e veículos no Firebase.<br>Execute apenas uma vez. Se já executou antes, os dados existentes serão mantidos.</p>
+  <button class="btn" id="btn" onclick="executarSetup()">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M3 9h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+    Iniciar setup
+  </button>
+  <div class="log" id="log"></div>
+  <div class="resultado" id="resultado"></div>
+</div>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+import { getFirestore, collection, doc, getDoc, setDoc, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB2xRYnt5N02dPOFyqPyKoBAGLGdw-noaU",
+  authDomain:        "dme--entregas-d31d0.firebaseapp.com",
+  projectId:         "dme--entregas-d31d0",
+  storageBucket:     "dme--entregas-d31d0.firebasestorage.app",
+  messagingSenderId: "363245703028",
+  appId:             "1:363245703028:web:184b5803ee1df67c722621"
+}
+
+const fapp = initializeApp(FIREBASE_CONFIG)
+const fdb  = getFirestore(fapp)
+
+const USUARIOS = [
+  { id:'u01', nome:'Sergio Eduardo Lopes Machado',   perfil:'gestor',       pin:'1234', ativo:true },
+  { id:'u02', nome:'Ramon Dalla Bernardina Machado', perfil:'gestor',       pin:'1235', ativo:true },
+  { id:'u03', nome:'Encarregado Expedição',          perfil:'encarregado',  pin:'2001', ativo:true },
+  { id:'u04', nome:'Encarregado Logística',          perfil:'encarregado',  pin:'2002', ativo:true },
+  { id:'u05', nome:'Christopher Fernandes da Penha', perfil:'motorista',    pin:'3001', ativo:true },
+  { id:'u06', nome:'Edson dos Santos Adorno',        perfil:'motorista',    pin:'3002', ativo:true },
+  { id:'u07', nome:'Luciano Valdoir de Oliveira',    perfil:'motorista',    pin:'3003', ativo:true },
+  { id:'u08', nome:'João Ademir Malvestio',          perfil:'motorista',    pin:'3004', ativo:true },
+  { id:'u09', nome:'Adilson Gomes de Souza',         perfil:'motorista',    pin:'3005', ativo:true },
+  { id:'u10', nome:'Jeferson Buss Schwans',          perfil:'motorista',    pin:'3006', ativo:true },
+  { id:'u11', nome:'Kaio Nogueira Correa',           perfil:'motorista',    pin:'3007', ativo:true },
+  { id:'u12', nome:'Kauan da Silva de Lima',         perfil:'motorista',    pin:'3008', ativo:true },
+  { id:'u13', nome:'Lucas Bottas Cardoso',           perfil:'motorista',    pin:'3009', ativo:true },
+  { id:'u14', nome:'Lucas Moura Pereira',            perfil:'motorista',    pin:'3010', ativo:true },
+  { id:'u15', nome:'Magno Godinho da Rocha',         perfil:'motorista',    pin:'3011', ativo:true },
+  { id:'u16', nome:'Miguel Correa dos Santos Netto', perfil:'motorista',    pin:'3012', ativo:true },
+  { id:'u17', nome:'Weverson Ferreira Texeira',      perfil:'motorista',    pin:'3013', ativo:true },
+  { id:'u18', nome:'Yuri Ribeiro de Barros',         perfil:'motorista',    pin:'3014', ativo:true },
+]
+
+const VEICULOS = [
+  { id:'v01', modelo:'VW/8.150E DELIVERY', placa:'MTD4J33', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+  { id:'v02', modelo:'M.BENZ/710',         placa:'MQL9B45', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+  { id:'v03', modelo:'VW/8.150E DELIVERY', placa:'MTB7G72', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+  { id:'v04', modelo:'VW/8.150E DELIVERY', placa:'MTB7G74', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+  { id:'v05', modelo:'FIAT/STRADA',        placa:'RBH3A06', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+  { id:'v06', modelo:'FIAT/STRADA',        placa:'SFX8D04', km:0, km_revisao:10000, status:'disponivel', motorista_id:null },
+]
+
+function log(msg, tipo='info') {
+  const el = document.getElementById('log')
+  el.style.display = 'block'
+  const d = document.createElement('div')
+  d.className = 'log-item ' + tipo
+  d.textContent = msg
+  el.appendChild(d)
+  el.scrollTop = el.scrollHeight
+}
+
+window.executarSetup = async () => {
+  const btn = document.getElementById('btn')
+  const res = document.getElementById('resultado')
+  btn.disabled = true
+  btn.textContent = 'Executando...'
+  res.style.display = 'none'
+
+  let criados = 0, existentes = 0, erros = 0
+
+  try {
+    log('Iniciando setup DME Entregas...', 'info')
+    log('─────────────────────────────', 'info')
+
+    /* Usuários */
+    log('Criando usuários...', 'info')
+    for (const u of USUARIOS) {
+      try {
+        const ref = doc(fdb, 'usuarios', u.id)
+        const snap = await getDoc(ref)
+        if (snap.exists()) {
+          log(`  ↳ ${u.nome} (PIN ${u.pin}) — já existe`, 'info')
+          existentes++
+        } else {
+          await setDoc(ref, { ...u, criadoEm: serverTimestamp() })
+          log(`  ✓ ${u.nome} (PIN ${u.pin}) — criado`, 'ok')
+          criados++
+        }
+      } catch(e) {
+        log(`  ✗ Erro em ${u.nome}: ${e.message}`, 'er')
+        erros++
+      }
+    }
+
+    log('─────────────────────────────', 'info')
+    log('Criando veículos...', 'info')
+
+    /* Veículos */
+    for (const v of VEICULOS) {
+      try {
+        const ref = doc(fdb, 'veiculos', v.id)
+        const snap = await getDoc(ref)
+        if (snap.exists()) {
+          log(`  ↳ ${v.modelo} — ${v.placa} — já existe`, 'info')
+          existentes++
+        } else {
+          await setDoc(ref, { ...v, criadoEm: serverTimestamp() })
+          log(`  ✓ ${v.modelo} — ${v.placa} — criado`, 'ok')
+          criados++
+        }
+      } catch(e) {
+        log(`  ✗ Erro em ${v.placa}: ${e.message}`, 'er')
+        erros++
+      }
+    }
+
+    log('─────────────────────────────', 'info')
+    log(`Concluído: ${criados} criados · ${existentes} já existiam · ${erros} erros`, erros > 0 ? 'er' : 'ok')
+
+    res.style.display = 'block'
+    if (erros === 0) {
+      res.className = 'resultado sucesso'
+      res.innerHTML = '✅ Setup concluído com sucesso!<br><small style="font-weight:400;font-size:12px">Todos os usuários e veículos foram criados no Firebase.<br>Você já pode fechar esta página e usar o app.</small>'
+    } else {
+      res.className = 'resultado erro'
+      res.innerHTML = `⚠️ Setup concluído com ${erros} erro(s).<br><small style="font-weight:400;font-size:12px">Verifique as regras do Firestore e tente novamente.</small>`
+    }
+
+  } catch(e) {
+    log('Erro geral: ' + e.message, 'er')
+    res.style.display = 'block'
+    res.className = 'resultado erro'
+    res.innerHTML = '❌ Erro ao conectar com o Firebase.<br><small style="font-weight:400;font-size:12px">Verifique as regras do Firestore e a conexão com internet.</small>'
+  }
+
+  btn.textContent = 'Executar novamente'
+  btn.disabled = false
+}
+</script>
+</body>
+</html>

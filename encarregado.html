@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#BA7517">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="style.css">
+<title>DME — Encarregado</title>
+</head>
+<body>
+<div class="layout-desk">
+  <aside class="sidebar">
+    <div class="sd-marca">
+      <div class="sd-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 16V9l8-5 8 5v7" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="7" y="10" width="6" height="6" rx="1" fill="white"/></svg></div>
+      <div><div style="font-size:13px;font-weight:700;color:var(--t1)">DME</div><div style="font-size:11px;color:var(--t3)" id="sd-nome">Encarregado</div></div>
+    </div>
+    <nav class="sd-nav">
+      <button class="nav-item ativo" data-aba="painel" onclick="abrirAba('painel',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.4"/></svg>Painel</button>
+      <button class="nav-item" data-aba="roteiro" onclick="abrirAba('roteiro',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Lançar roteiro</button>
+      <button class="nav-item" data-aba="rotas" onclick="abrirAba('rotas',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 2l6 6-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Rotas em campo</button>
+      <button class="nav-item" data-aba="ocorrencias" onclick="abrirAba('ocorrencias',this)"><svg viewBox="0 0 16 16" fill="none"><path d="M8 2L2 13h12L8 2z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 7v3M8 11.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>Ocorrências</button>
+      <button class="nav-item" data-aba="frota" onclick="abrirAba('frota',this)"><svg viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 8l4-2v5l-4-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="4" cy="14" r="1.5" stroke="currentColor" stroke-width="1.2"/><circle cx="9" cy="14" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>Frota</button>
+    </nav>
+    <div class="sd-rod"><button class="nav-item" onclick="logout()"><svg viewBox="0 0 16 16" fill="none"><path d="M10 8H2M5 5l-3 3 3 3M12 3v10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Sair</button></div>
+  </aside>
+
+  <main class="main">
+    <div class="main-body">
+      <div class="topo-pg">
+        <div><div class="topo-titulo" id="topo-titulo">Painel</div><div class="topo-data" id="topo-data"></div></div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:14px;font-weight:500;color:var(--t2);background:var(--bg);padding:7px 13px;border-radius:var(--rs);border:.5px solid var(--b1);font-variant-numeric:tabular-nums" id="top-hora">--:--</div>
+        </div>
+      </div>
+
+      <div id="aba-painel" class="aba ativa">
+        <div class="kpi-grid" id="kpis"></div>
+        <div id="alerta-wrap"></div>
+        <div class="sec">Rotas de hoje</div>
+        <div id="painel-rotas" class="col-cards"></div>
+      </div>
+
+      <div id="aba-roteiro" class="aba">
+        <div class="cartao">
+          <h3 style="font-size:15px;font-weight:700;margin-bottom:1rem">Nova entrega no roteiro</h3>
+          <div class="campo"><label class="rotulo">Motorista responsável</label><select id="rot-mot" class="selecao"></select></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="campo"><label class="rotulo">Número da NF</label><input type="text" id="rot-nf" class="entrada" placeholder="Ex: 012.847"></div>
+            <div class="campo"><label class="rotulo">Pedido</label><input type="text" id="rot-pedido" class="entrada" placeholder="Ex: #58291"></div>
+          </div>
+          <div class="campo"><label class="rotulo">Cliente</label><input type="text" id="rot-cli" class="entrada" placeholder="Nome do cliente"></div>
+          <div class="campo"><label class="rotulo">Endereço de entrega</label><input type="text" id="rot-end" class="entrada" placeholder="Rua, número – Cidade/ES"></div>
+          <div class="campo"><label class="rotulo">Observação (opcional)</label><textarea id="rot-obs" class="textarea" style="min-height:60px" placeholder="Instruções especiais..."></textarea></div>
+          <button class="btn btn-verde" id="btn-lancar" onclick="lancarEntrega()">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M3 9h12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Lançar entrega
+          </button>
+        </div>
+        <div style="margin-top:1.5rem">
+          <div class="sec">Roteiro lançado hoje</div>
+          <div id="lista-roteiro" class="col-cards"></div>
+          <div id="roteiro-vazio" class="vazio" style="display:none"><div class="vazio-ic">📋</div>Nenhuma entrega lançada hoje.</div>
+        </div>
+      </div>
+
+      <div id="aba-rotas" class="aba">
+        <div class="sec">Motoristas em campo agora</div>
+        <div id="rotas-campo" class="col-cards"></div>
+        <div id="rotas-vazio" class="vazio" style="display:none"><div class="vazio-ic">🚚</div>Nenhuma rota ativa no momento.</div>
+      </div>
+
+      <div id="aba-ocorrencias" class="aba">
+        <div class="sec">Ocorrências abertas</div>
+        <div id="lista-ocorr" class="col-cards"></div>
+        <div id="ocorr-vazio" class="vazio" style="display:none"><div class="vazio-ic">✓</div>Nenhuma ocorrência aberta hoje.</div>
+      </div>
+
+      <div id="aba-frota" class="aba">
+        <div class="sec">Situação dos veículos</div>
+        <div class="tabela-wrap">
+          <table class="tabela">
+            <thead><tr><th>Veículo</th><th>Placa</th><th>KM atual</th><th>Motorista</th><th>Status</th></tr></thead>
+            <tbody id="frota-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav">
+  <button class="bn ativo" data-aba="painel" onclick="abrirAba('painel',this)"><svg viewBox="0 0 22 22" fill="none"><rect x="2" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="2" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="2" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/><rect x="12" y="12" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>Painel</button>
+  <button class="bn" data-aba="roteiro" onclick="abrirAba('roteiro',this)"><svg viewBox="0 0 22 22" fill="none"><path d="M11 4v14M4 11h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Lançar</button>
+  <button class="bn" data-aba="rotas" onclick="abrirAba('rotas',this)"><svg viewBox="0 0 22 22" fill="none"><path d="M3 11h16M11 3l8 8-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Campo</button>
+  <button class="bn" data-aba="ocorrencias" onclick="abrirAba('ocorrencias',this)"><svg viewBox="0 0 22 22" fill="none"><path d="M11 2L2 19h18L11 2z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 10v4M11 16v.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Ocorr.</button>
+  <button class="bn" data-aba="frota" onclick="abrirAba('frota',this)"><svg viewBox="0 0 22 22" fill="none"><rect x="2" y="8" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M15 12l5-3v7l-5-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Frota</button>
+</nav>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, setDoc, deleteDoc, onSnapshot, query, where, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+
+/* ══ COLE SUAS CREDENCIAIS FIREBASE AQUI ══ */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB2xRYnt5N02dPOFyqPyKoBAGLGdw-noaU",
+  authDomain:        "dme--entregas-d31d0.firebaseapp.com",
+  projectId:         "dme--entregas-d31d0",
+  storageBucket:     "dme--entregas-d31d0.firebasestorage.app",
+  messagingSenderId: "363245703028",
+  appId:             "1:363245703028:web:184b5803ee1df67c722621"
+}
+/* ══════════════════════════════════════════ */
+
+const fapp=initializeApp(FIREBASE_CONFIG)
+const fdb=getFirestore(fapp)
+const s2a=snap=>snap.docs.map(d=>({...d.data(),_id:d.id}))
+const hoje=()=>new Date().toISOString().split('T')[0]
+const agora=()=>new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+
+function getSessao(){try{return JSON.parse(localStorage.getItem('dme_s'))}catch{return null}}
+function logout(){localStorage.removeItem('dme_s');window.location.href='index.html'}
+window.logout=logout
+
+const sessao=getSessao()
+if(!sessao||!['encarregado','gestor'].includes(sessao.perfil)){logout()}
+document.getElementById('sd-nome').textContent=sessao.nome.split(' ')[0]
+
+let abaAtual='painel'
+let unsubEnt=null,unsubRot=null,unsubOcorr=null,unsubVei=null
+
+function abrirAba(nome,el){
+  document.querySelectorAll('.aba').forEach(a=>a.classList.remove('ativa'))
+  document.querySelectorAll('.nav-item,.bn').forEach(n=>n.classList.remove('ativo'))
+  document.getElementById('aba-'+nome).classList.add('ativa')
+  if(el)el.classList.add('ativo')
+  document.querySelectorAll(`[data-aba="${nome}"]`).forEach(e=>e.classList.add('ativo'))
+  const titulos={painel:'Painel',roteiro:'Lançar roteiro',rotas:'Rotas em campo',ocorrencias:'Ocorrências',frota:'Frota'}
+  document.getElementById('topo-titulo').textContent=titulos[nome]||nome
+  abaAtual=nome
+  if(nome==='roteiro')carregarSelectMot()
+  if(nome==='frota')escutarFrota()
+}
+window.abrirAba=abrirAba
+
+/* Listeners em tempo real */
+function iniciarListeners(){
+  const h=hoje()
+
+  /* Painel + rotas campo */
+  if(unsubRot)unsubRot()
+  unsubRot=onSnapshot(query(collection(fdb,'rotas'),where('data','==',h)),snap=>{
+    const rotas=s2a(snap)
+    renderPainelRotas(rotas)
+    renderRotasCampo(rotas)
+  })
+
+  /* Entregas */
+  if(unsubEnt)unsubEnt()
+  unsubEnt=onSnapshot(query(collection(fdb,'entregas'),where('data','==',h)),snap=>{
+    const ents=s2a(snap)
+    renderKPIs(ents)
+    renderListaRoteiro(ents)
+  })
+
+  /* Ocorrências */
+  if(unsubOcorr)unsubOcorr()
+  unsubOcorr=onSnapshot(query(collection(fdb,'ocorrencias'),where('data','==',h)),snap=>{
+    const ocs=s2a(snap)
+    renderOcorr(ocs)
+    renderAlerta(ocs)
+  })
+}
+
+function renderKPIs(ents){
+  const ok=ents.filter(e=>e.status==='ok').length
+  const pe=ents.filter(e=>e.status==='pend').length
+  const pr=ents.filter(e=>e.status==='prob').length
+  const ocs_ab=document.querySelectorAll('.oc-aberta').length
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-num kpi-vrd">${ok}</div><div class="kpi-leg">Confirmadas</div></div>
+    <div class="kpi"><div class="kpi-num kpi-am">${pe}</div><div class="kpi-leg">Pendentes</div></div>
+    <div class="kpi"><div class="kpi-num kpi-vm">${pr}</div><div class="kpi-leg">Ocorrências</div></div>
+    <div class="kpi"><div class="kpi-num kpi-az">${ents.length}</div><div class="kpi-leg">Total hoje</div></div>`
+}
+
+function renderAlerta(ocs){
+  const abertas=ocs.filter(o=>o.status==='aberta')
+  const w=document.getElementById('alerta-wrap')
+  w.innerHTML=abertas.length?`<div class="alerta" style="margin-bottom:1rem">
+    <div class="alerta-ic"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L2 17h16L10 2z" stroke="#791F1F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9v4M10 15v.5" stroke="#791F1F" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <div><div class="alerta-titulo">${abertas.length} ocorrência(s) aberta(s) — requer ação</div>
+    <div class="alerta-txt">${abertas.map(o=>`<b>${o.motorista.split(' ')[0]}</b> · NF ${o.nf} · ${o.tipo}`).join('<br>')}</div></div>
+  </div>`:''
+}
+
+function renderPainelRotas(rotas){
+  const c=document.getElementById('painel-rotas');c.innerHTML=''
+  if(!rotas.length){c.innerHTML='<div class="vazio"><div class="vazio-ic">🚚</div>Nenhuma rota iniciada hoje.</div>';return}
+  rotas.forEach(r=>{
+    const sc={em_rota:'etq-ok',concluida:'etq-enc',cancelada:'etq-pr'}[r.status]||'etq-pe'
+    const st={em_rota:'Em rota',concluida:'Concluída',cancelada:'Cancelada'}[r.status]||r.status
+    const d=document.createElement('div');d.className='cartao'
+    d.innerHTML=`<div class="flex-sb" style="margin-bottom:4px"><strong style="font-size:14px">${r.motorista_nome}</strong><span class="etq ${sc}">${st}</span></div>
+    <div style="font-size:12px;color:var(--t3)">${r.veiculo} · Saída ${r.iniciada}${r.encerrada?' · Retorno '+r.encerrada:''} · KM: ${r.km_inicial||0}→${r.km_final||'—'}</div>`
+    c.appendChild(d)
+  })
+}
+
+function renderRotasCampo(rotas){
+  const ativas=rotas.filter(r=>r.status==='em_rota')
+  const c=document.getElementById('rotas-campo'),v=document.getElementById('rotas-vazio')
+  c.innerHTML=''
+  if(!ativas.length){v.style.display='block';return}
+  v.style.display='none'
+  ativas.forEach(r=>{
+    const d=document.createElement('div');d.className='cartao'
+    d.innerHTML=`<div class="flex-sb" style="margin-bottom:6px"><strong style="font-size:14px">${r.motorista_nome}</strong><span class="etq etq-ok">Em rota</span></div>
+    <div style="font-size:12px;color:var(--t3)">${r.veiculo} · Saída ${r.iniciada} · KM inicial: ${r.km_inicial||0}</div>`
+    c.appendChild(d)
+  })
+}
+
+function renderListaRoteiro(ents){
+  const lista=document.getElementById('lista-roteiro'),vazio=document.getElementById('roteiro-vazio')
+  lista.innerHTML=''
+  if(!ents.length){vazio.style.display='block';return}
+  vazio.style.display='none'
+  ents.forEach(e=>{
+    const sc={pend:'etq-pe',ok:'etq-ok',prob:'etq-pr'}[e.status]||'etq-pe'
+    const st={pend:'Pendente',ok:'Entregue',prob:'Ocorrência'}[e.status]||e.status
+    const d=document.createElement('div');d.className='cartao'
+    d.style.borderLeft=e.status==='ok'?'4px solid var(--gn)':e.status==='prob'?'4px solid var(--dr)':'4px solid var(--am)'
+    d.innerHTML=`<div class="flex-sb" style="margin-bottom:4px"><strong style="font-size:13px">${e.cliente}</strong><span class="etq ${sc}">${st}</span></div>
+    <div style="font-size:12px;color:var(--t3)">NF ${e.nf} · ${e.endereco}</div>
+    ${e.status==='pend'?`<button class="btn btn-sec btn-sm" style="margin-top:8px;color:var(--dr);border-color:var(--dr)" onclick="removerEntrega('${e._id}')">Remover</button>`:''}`
+    lista.appendChild(d)
+  })
+}
+
+function renderOcorr(ocs){
+  const lista=document.getElementById('lista-ocorr'),vazio=document.getElementById('ocorr-vazio')
+  lista.innerHTML='';document.querySelectorAll('.oc-aberta').forEach(e=>e.remove())
+  if(!ocs.length){vazio.style.display='block';return}
+  vazio.style.display='none'
+  ocs.forEach(o=>{
+    const d=document.createElement('div');d.className='cartao oc-aberta'
+    d.style.borderLeft=o.status==='aberta'?'4px solid var(--dr)':'4px solid var(--gn)'
+    d.innerHTML=`<div class="flex-sb" style="margin-bottom:4px"><strong style="font-size:13px;color:var(--dr)">${o.tipo}</strong><span class="etq ${o.status==='aberta'?'etq-pr':'etq-ok'}">${o.status==='aberta'?'Aberta':'Fechada'}</span></div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:4px">${o.motorista} · NF ${o.nf} · ${o.cliente} · ${o.hora}</div>
+    ${o.obs?`<div style="font-size:12px;color:var(--t3);font-style:italic">"${o.obs}"</div>`:''}
+    ${o.status==='aberta'?`<button class="btn btn-verde btn-sm" style="margin-top:8px" onclick="fecharOcorrencia('${o._id}')">Marcar como resolvida</button>`:''}`
+    lista.appendChild(d)
+  })
+}
+
+/* Frota listener */
+function escutarFrota(){
+  if(unsubVei)unsubVei()
+  unsubVei=onSnapshot(collection(fdb,'veiculos'),snap=>{
+    const vs=s2a(snap)
+    getDocs(collection(fdb,'usuarios')).then(uSnap=>{
+      const us=s2a(uSnap)
+      document.getElementById('frota-body').innerHTML=vs.map(v=>{
+        const mot=v.motorista_id?us.find(u=>u._id===v.motorista_id||String(u.id)===String(v.motorista_id)):null
+        const st=v.status==='em_uso'?'<span class="ponto p-am"></span>Em uso':'<span class="ponto p-vrd"></span>Disponível'
+        return`<tr><td><strong>${v.modelo}</strong></td><td style="font-family:monospace">${v.placa}</td><td>${(v.km||0).toLocaleString('pt-BR')} km</td><td>${mot?mot.nome.split(' ')[0]:'—'}</td><td>${st}</td></tr>`
+      }).join('')
+    })
+  })
+}
+
+/* Lançar entrega */
+async function carregarSelectMot(){
+  const sel=document.getElementById('rot-mot')
+  if(sel.options.length>1)return
+  sel.innerHTML='<option value="">Selecione o motorista...</option>'
+  const snap=await getDocs(query(collection(fdb,'usuarios'),where('perfil','==','motorista'),where('ativo','==',true)))
+  snap.docs.forEach(d=>{const u=d.data();const o=document.createElement('option');o.value=d.id;o.textContent=u.nome;sel.appendChild(o)})
+}
+
+window.lancarEntrega=async()=>{
+  const mid=document.getElementById('rot-mot').value
+  const nf=document.getElementById('rot-nf').value.trim()
+  const pedido=document.getElementById('rot-pedido').value.trim()
+  const cli=document.getElementById('rot-cli').value.trim()
+  const end=document.getElementById('rot-end').value.trim()
+  const obs=document.getElementById('rot-obs').value.trim()
+  if(!mid)return alert('Selecione o motorista.')
+  if(!nf)return alert('Informe o número da NF.')
+  if(!cli)return alert('Informe o cliente.')
+  if(!end)return alert('Informe o endereço.')
+  const uSnap=await getDocs(query(collection(fdb,'usuarios'),where('ativo','==',true)))
+  const uDoc=uSnap.docs.find(d=>d.id===mid)
+  if(!uDoc)return alert('Motorista não encontrado.')
+  const u=uDoc.data()
+  document.getElementById('btn-lancar').disabled=true
+  await addDoc(collection(fdb,'entregas'),{
+    data:hoje(),motorista_id:mid,motorista_nome:u.nome,
+    nf,pedido:pedido||'—',cliente:cli,endereco:end,obs,
+    status:'pend',hora_conf:null,ocorrencia:'',assinatura:null,
+    lancado_por:sessao._id||sessao.id,lancado_em:agora(),criadoEm:serverTimestamp()
+  })
+  ;['rot-nf','rot-pedido','rot-cli','rot-end','rot-obs'].forEach(id=>document.getElementById(id).value='')
+  document.getElementById('rot-nf').focus()
+  document.getElementById('btn-lancar').disabled=false
+  alert('Entrega lançada! NF '+nf+' para '+cli)
+}
+
+window.removerEntrega=async id=>{
+  const snap=await getDocs(collection(fdb,'entregas'))
+  const ent=snap.docs.find(d=>d.id===id)
+  if(!ent)return
+  if(ent.data().status!=='pend')return alert('Não é possível remover uma entrega já confirmada ou com ocorrência.')
+  if(!confirm('Remover esta entrega do roteiro?'))return
+  await deleteDoc(doc(fdb,'entregas',id))
+}
+
+window.fecharOcorrencia=async id=>{
+  await updateDoc(doc(fdb,'ocorrencias',id),{status:'fechada',fechada_em:agora()})
+}
+
+function tick(){
+  const h=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+  document.getElementById('top-hora').textContent=h
+  document.getElementById('topo-data').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'})
+}
+tick();setInterval(tick,30000)
+iniciarListeners()
+</script>
+</body>
+</html>

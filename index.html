@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#8B2B2B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DME">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>DME Entregas</title>
+</head>
+<body>
+
+<div id="tela-login" class="tela ativa">
+<div class="pin-pg">
+  <div class="pin-logo"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M3 24V13l12-7 12 7v11" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="10" y="16" width="10" height="8" rx="1.5" fill="white"/></svg></div>
+  <div class="pin-titulo">DME Entregas</div>
+  <div class="pin-sub">Digite seu PIN de 4 dígitos</div>
+  <div class="pin-display" id="pin-display">····</div>
+  <div class="pin-teclado">
+    <button class="pin-btn" onclick="pinDigit('1')">1</button><button class="pin-btn" onclick="pinDigit('2')">2</button><button class="pin-btn" onclick="pinDigit('3')">3</button>
+    <button class="pin-btn" onclick="pinDigit('4')">4</button><button class="pin-btn" onclick="pinDigit('5')">5</button><button class="pin-btn" onclick="pinDigit('6')">6</button>
+    <button class="pin-btn" onclick="pinDigit('7')">7</button><button class="pin-btn" onclick="pinDigit('8')">8</button><button class="pin-btn" onclick="pinDigit('9')">9</button>
+    <button class="pin-btn vazio"></button><button class="pin-btn" onclick="pinDigit('0')">0</button><button class="pin-btn del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-erro" id="pin-erro"></div>
+  <div id="pin-load" style="display:none;font-size:13px;color:var(--t3);margin-top:8px">Verificando...</div>
+</div>
+</div>
+
+<div id="tela-veiculo" class="tela">
+<div class="pin-pg" style="justify-content:flex-start;padding-top:3rem">
+  <div class="pin-logo"><svg width="28" height="28" viewBox="0 0 28 28" fill="none"><path d="M2 22V12l12-7 12 7v10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="14" width="10" height="8" rx="1.5" fill="white"/></svg></div>
+  <div class="pin-titulo" id="vei-saudacao" style="text-align:center">Olá!</div>
+  <div class="pin-sub">Selecione o veículo e informe o KM</div>
+  <div style="width:100%;max-width:340px;margin:0 auto">
+    <div class="campo"><label class="rotulo">Veículo</label><select id="vei-sel" class="selecao"><option value="">Carregando...</option></select></div>
+    <div class="campo"><label class="rotulo">KM atual do veículo</label><input type="number" id="vei-km" class="entrada" placeholder="Ex: 45230" inputmode="numeric"></div>
+    <button class="btn" id="btn-iniciar" onclick="iniciarRota()">
+      <span>Iniciar rota</span>
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9h12M11 5l4 4-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</div>
+</div>
+
+<div id="tela-roteiro" class="tela">
+  <div class="cab cab-mot">
+    <div class="cab-esq">
+      <div class="cab-av" id="rot-av">—</div>
+      <div><div class="cab-nome" id="rot-nome">—</div><div class="cab-perfil" id="rot-vei">—</div></div>
+    </div>
+    <div class="cab-hora" id="rot-hora">--:--</div>
+    <button class="btn-logout" onclick="confirmarLogout()">Sair</button>
+  </div>
+  <div class="corpo">
+    <div class="stats">
+      <div class="stat stat-ok"><span class="stat-num" id="st-ok">0</span><span class="stat-leg">entregues</span></div>
+      <div class="stat stat-pe"><span class="stat-num" id="st-pe">0</span><span class="stat-leg">pendentes</span></div>
+      <div class="stat stat-pr"><span class="stat-num" id="st-pr">0</span><span class="stat-leg">ocorrências</span></div>
+    </div>
+    <div class="sec">Minhas entregas de hoje</div>
+    <div id="lista-entregas" class="col-cards"></div>
+    <div id="roteiro-vazio" class="vazio" style="display:none"><div class="vazio-ic">📋</div>Nenhuma entrega lançada para você hoje.<br>Aguarde o encarregado liberar o roteiro.</div>
+    <button class="btn btn-sec mt2" onclick="irPara('encerrar')">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 2h4v4M6 10L14 2M7 4H2v10h10V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Encerrar rota
+    </button>
+  </div>
+</div>
+
+<div id="tela-confirmar" class="tela">
+  <div class="cab cab-mot">
+    <button class="btn-back" onclick="irPara('roteiro')"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 4L7 10l6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div><div class="cab-nome" id="conf-cli">—</div><div class="cab-perfil" id="conf-nf">—</div></div>
+  </div>
+  <div class="corpo">
+    <div class="sec">Checklist de entrega</div>
+    <div class="checklist" id="checklist"></div>
+    <div class="sec mt2">Ocorrência</div>
+    <select id="tipo-oc" class="selecao" onchange="mostrarObs(this.value)" style="margin-bottom:8px">
+      <option value="">Sem ocorrência — entrega normal</option>
+      <option>Cliente ausente</option><option>Divergência de item</option>
+      <option>Recusa de recebimento</option><option>Acesso negado ao cliente</option>
+      <option>Atraso por tráfego</option><option>Problema no veículo</option><option>Outro</option>
+    </select>
+    <textarea id="obs-oc" class="textarea" placeholder="Descreva a ocorrência..." style="display:none;margin-bottom:1rem"></textarea>
+    <div class="sec mt1">Assinatura do recebedor</div>
+    <div class="assinatura-box mt1" style="margin-bottom:1rem">
+      <canvas id="canvas-sig"></canvas>
+      <button onclick="limparSig()">Limpar</button>
+    </div>
+    <button class="btn btn-fixo" id="btn-confirmar" onclick="confirmarEntrega()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 11l4 4L16 6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Confirmar entrega</span>
+    </button>
+  </div>
+</div>
+
+<div id="tela-sucesso" class="tela">
+<div class="pg-sucesso">
+  <div class="suc-ic"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M6 19l7 7L30 8" stroke="#1D9E75" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <h2>Entrega registrada!</h2>
+  <p id="suc-txt">Confirmação salva com sucesso.</p>
+  <button class="btn" onclick="irPara('roteiro')">Voltar ao roteiro</button>
+</div>
+</div>
+
+<div id="tela-encerrar" class="tela">
+  <div class="cab cab-mot">
+    <button class="btn-back" onclick="irPara('roteiro')"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M13 4L7 10l6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div><div class="cab-nome">Encerrar rota</div><div class="cab-perfil">Prestação de contas</div></div>
+  </div>
+  <div class="corpo">
+    <div class="cartao">
+      <div id="enc-resumo" style="background:var(--bg);border-radius:var(--rs);padding:12px 14px;margin-bottom:1rem;font-size:13px"></div>
+      <div class="campo"><label class="rotulo">KM final do veículo</label><input type="number" id="km-fin" class="entrada" placeholder="Ex: 45480" inputmode="numeric"></div>
+      <div class="campo"><label class="rotulo">Observações gerais</label><textarea id="obs-rota" class="textarea" placeholder="Condições do veículo, intercorrências..."></textarea></div>
+      <div class="checklist" style="margin-bottom:1.25rem">
+        <div class="item-chk atencao" onclick="marcarItem(this)"><div class="caixinha"></div><div class="item-txt">Todas as NFs físicas entregues ao encarregado</div></div>
+        <div class="item-chk" onclick="marcarItem(this)"><div class="caixinha"></div><div class="item-txt">Veículo estacionado no local correto</div></div>
+        <div class="item-chk" onclick="marcarItem(this)"><div class="caixinha"></div><div class="item-txt">Nenhum material da DME permaneceu no veículo</div></div>
+      </div>
+      <button class="btn" id="btn-finalizar" onclick="finalizarRota()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 10l4 4L15 5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Finalizar rota</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js'
+import { getFirestore, collection, doc, getDocs, addDoc, updateDoc, setDoc, onSnapshot, query, where, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js'
+
+/* ══ COLE SUAS CREDENCIAIS FIREBASE AQUI ══ */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB2xRYnt5N02dPOFyqPyKoBAGLGdw-noaU",
+  authDomain:        "dme--entregas-d31d0.firebaseapp.com",
+  projectId:         "dme--entregas-d31d0",
+  storageBucket:     "dme--entregas-d31d0.firebasestorage.app",
+  messagingSenderId: "363245703028",
+  appId:             "1:363245703028:web:184b5803ee1df67c722621"
+}
+/* ══════════════════════════════════════════ */
+
+const fapp = initializeApp(FIREBASE_CONFIG)
+const fdb  = getFirestore(fapp)
+const s2a  = snap => snap.docs.map(d=>({...d.data(),_id:d.id}))
+const hoje = () => new Date().toISOString().split('T')[0]
+const agora= () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})
+
+let sessao=null, entregaAtual=null, sigCtx=null, sOn=false, sX=0, sY=0, pinAtual='', unsubEnt=null
+
+const CHECKLIST=[
+  {t:'Carga confere com a Nota Fiscal (itens e quantidades)',w:false},
+  {t:'EPIs completos e cadastramento em dia para este cliente',w:true},
+  {t:'Descarga acompanhada pelo motorista',w:false},
+  {t:'Conferência visual realizada com o recebedor',w:false},
+  {t:'Cliente aceitou o recebimento sem ressalvas',w:true},
+  {t:'Canhoto / comprovante assinado pelo cliente',w:true},
+]
+
+/* helpers */
+function setSessao(u){localStorage.setItem('dme_s',JSON.stringify(u))}
+function getSessao(){try{return JSON.parse(localStorage.getItem('dme_s'))}catch{return null}}
+function logout(){if(unsubEnt)unsubEnt();localStorage.removeItem('dme_s');window.location.href='index.html'}
+function ini(nome){const p=nome.split(' ');return(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase()}
+function setBusy(id,v){const b=document.getElementById(id);if(b){b.disabled=v;b.style.opacity=v?.6:1}}
+function irTela(n){document.querySelectorAll('.tela').forEach(t=>t.classList.remove('ativa'));const e=document.getElementById('tela-'+n);if(e)e.classList.add('ativa');window.scrollTo(0,0)}
+function atualizarCab(){if(!sessao)return;document.getElementById('rot-av').textContent=ini(sessao.nome);document.getElementById('rot-nome').textContent=sessao.nome.split(' ')[0];document.getElementById('rot-vei').textContent=sessao.veiculo||'—'}
+
+/* init Firebase — popular dados iniciais se banco vazio */
+async function initDB(){
+  const snap=await getDocs(collection(fdb,'usuarios'))
+  if(!snap.empty)return
+  const us=[
+    {id:1,nome:'Sergio Eduardo Lopes Machado',perfil:'gestor',pin:'1234',ativo:true},
+    {id:2,nome:'Ramon Dalla Bernardina Machado',perfil:'gestor',pin:'1235',ativo:true},
+    {id:3,nome:'Encarregado Expedição',perfil:'encarregado',pin:'2001',ativo:true},
+    {id:4,nome:'Encarregado Logística',perfil:'encarregado',pin:'2002',ativo:true},
+    {id:5,nome:'Christopher Fernandes da Penha',perfil:'motorista',pin:'3001',ativo:true},
+    {id:6,nome:'Edson dos Santos Adorno',perfil:'motorista',pin:'3002',ativo:true},
+    {id:7,nome:'Luciano Valdoir de Oliveira',perfil:'motorista',pin:'3003',ativo:true},
+    {id:8,nome:'João Ademir Malvestio',perfil:'motorista',pin:'3004',ativo:true},
+    {id:9,nome:'Adilson Gomes de Souza',perfil:'motorista',pin:'3005',ativo:true},
+    {id:10,nome:'Jeferson Buss Schwans',perfil:'motorista',pin:'3006',ativo:true},
+    {id:11,nome:'Kaio Nogueira Correa',perfil:'motorista',pin:'3007',ativo:true},
+    {id:12,nome:'Kauan da Silva de Lima',perfil:'motorista',pin:'3008',ativo:true},
+    {id:13,nome:'Lucas Bottas Cardoso',perfil:'motorista',pin:'3009',ativo:true},
+    {id:14,nome:'Lucas Moura Pereira',perfil:'motorista',pin:'3010',ativo:true},
+    {id:15,nome:'Magno Godinho da Rocha',perfil:'motorista',pin:'3011',ativo:true},
+    {id:16,nome:'Miguel Correa dos Santos Netto',perfil:'motorista',pin:'3012',ativo:true},
+    {id:17,nome:'Weverson Ferreira Texeira',perfil:'motorista',pin:'3013',ativo:true},
+    {id:18,nome:'Yuri Ribeiro de Barros',perfil:'motorista',pin:'3014',ativo:true},
+  ]
+  const vs=[
+    {id:1,modelo:'VW/8.150E DELIVERY',placa:'MTD4J33',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+    {id:2,modelo:'M.BENZ/710',placa:'MQL9B45',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+    {id:3,modelo:'VW/8.150E DELIVERY',placa:'MTB7G72',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+    {id:4,modelo:'VW/8.150E DELIVERY',placa:'MTB7G74',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+    {id:5,modelo:'FIAT/STRADA',placa:'RBH3A06',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+    {id:6,modelo:'FIAT/STRADA',placa:'SFX8D04',km:0,km_revisao:10000,status:'disponivel',motorista_id:null},
+  ]
+  for(const u of us) await setDoc(doc(fdb,'usuarios',String(u.id)),u)
+  for(const v of vs) await setDoc(doc(fdb,'veiculos',String(v.id)),v)
+}
+await initDB()
+
+/* PIN */
+window.pinDigit=d=>{if(pinAtual.length>=4)return;pinAtual+=d;updPin();if(pinAtual.length===4)setTimeout(checkPin,200)}
+window.pinDel=()=>{pinAtual=pinAtual.slice(0,-1);updPin();document.getElementById('pin-erro').textContent=''}
+function updPin(){document.getElementById('pin-display').textContent='●'.repeat(pinAtual.length)+'·'.repeat(4-pinAtual.length)}
+
+async function checkPin(){
+  document.getElementById('pin-load').style.display='block'
+  const q=query(collection(fdb,'usuarios'),where('pin','==',pinAtual),where('ativo','==',true))
+  const snap=await getDocs(q)
+  pinAtual='';updPin();document.getElementById('pin-load').style.display='none'
+  if(snap.empty){document.getElementById('pin-erro').textContent='PIN incorreto. Tente novamente.';return}
+  const u={...snap.docs[0].data(),_id:snap.docs[0].id}
+  document.getElementById('pin-erro').textContent=''
+  setSessao(u);sessao=u
+  if(u.perfil==='gestor'){window.location.href='gestor.html';return}
+  if(u.perfil==='encarregado'){window.location.href='encarregado.html';return}
+  await checkRotaAtiva(u)
+}
+
+async function checkRotaAtiva(u){
+  const q=query(collection(fdb,'rotas'),where('motorista_id','==',u.id),where('data','==',hoje()),where('status','==','em_rota'))
+  const snap=await getDocs(q)
+  if(!snap.empty){
+    const r={...snap.docs[0].data(),_id:snap.docs[0].id}
+    sessao.rota_id=r._id;sessao.veiculo=r.veiculo;sessao.veiculo_id=r.veiculo_id;sessao.km_inicial=r.km_inicial
+    setSessao(sessao);atualizarCab();iniciarEscuta();irTela('roteiro')
+  } else {
+    await loadVeiculos()
+    document.getElementById('vei-saudacao').textContent='Olá, '+u.nome.split(' ')[0]+'!'
+    irTela('veiculo')
+  }
+}
+
+async function loadVeiculos(){
+  const snap=await getDocs(collection(fdb,'veiculos'))
+  const sel=document.getElementById('vei-sel')
+  sel.innerHTML='<option value="">Selecione o veículo...</option>'
+  snap.docs.forEach(d=>{
+    const v={...d.data(),_id:d.id}
+    const meu=sessao&&v.motorista_id===sessao.id
+    if(v.status!=='disponivel'&&!meu)return
+    const o=document.createElement('option')
+    o.value=d.id
+    o.textContent=v.modelo+' — '+v.placa+(meu&&v.status==='em_uso'?' (seu veículo)':'')
+    sel.appendChild(o)
+  })
+}
+
+window.iniciarRota=async()=>{
+  const vId=document.getElementById('vei-sel').value
+  const km=parseInt(document.getElementById('vei-km').value)||0
+  if(!vId)return alert('Selecione o veículo.')
+  setBusy('btn-iniciar',true)
+  const vSnap=await getDocs(collection(fdb,'veiculos'))
+  const vDoc=vSnap.docs.find(d=>d.id===vId)
+  if(!vDoc){setBusy('btn-iniciar',false);return}
+  const v=vDoc.data()
+  await setDoc(doc(fdb,'veiculos',vId),{...v,status:'em_uso',motorista_id:sessao.id})
+  const rRef=await addDoc(collection(fdb,'rotas'),{
+    motorista_id:sessao.id,motorista_nome:sessao.nome,
+    veiculo_id:vId,veiculo:v.modelo+' — '+v.placa,
+    km_inicial:km,km_final:null,data:hoje(),iniciada:agora(),
+    encerrada:null,status:'em_rota',obs:'',criadoEm:serverTimestamp()
+  })
+  sessao.rota_id=rRef.id;sessao.veiculo=v.modelo+' — '+v.placa;sessao.veiculo_id=vId;sessao.km_inicial=km
+  setSessao(sessao);setBusy('btn-iniciar',false);atualizarCab();iniciarEscuta();irTela('roteiro')
+}
+
+function iniciarEscuta(){
+  if(unsubEnt)unsubEnt()
+  const q=query(collection(fdb,'entregas'),where('motorista_id','==',sessao.id),where('data','==',hoje()))
+  unsubEnt=onSnapshot(q,snap=>{
+    const ents=s2a(snap)
+    const lista=document.getElementById('lista-entregas')
+    const vazio=document.getElementById('roteiro-vazio')
+    lista.innerHTML=''
+    if(!ents.length){vazio.style.display='block';['st-ok','st-pe','st-pr'].forEach(i=>document.getElementById(i).textContent=0);return}
+    vazio.style.display='none'
+    let ok=0,pe=0,pr=0
+    ents.forEach((e,i)=>{
+      if(e.status==='ok')ok++;else if(e.status==='prob')pr++;else pe++
+      const sc={pend:'s-pend',ok:'s-ok',prob:'s-prob'}[e.status]||'s-pend'
+      const ec={pend:'etq-pe',ok:'etq-ok',prob:'etq-pr'}[e.status]||'etq-pe'
+      const et={pend:'Pendente',ok:'Entregue',prob:'Ocorrência'}[e.status]||'Pendente'
+      const d=document.createElement('div');d.className='card-entrega '+sc
+      d.innerHTML=`<div class="ce-l1"><div class="ce-seq">${i+1}</div><div class="ce-info"><div class="ce-cli">${e.cliente}</div><div class="ce-nf">NF ${e.nf} · Pedido ${e.pedido||'—'}</div></div><span class="etq ${ec}">${et}</span></div><div class="ce-l2"><span class="ce-end">${e.endereco}</span>${e.status==='pend'?`<button class="btn-conf" onclick="abrirConf('${e._id}')">Conferir</button>`:`<span style="font-size:11px;color:var(--t3)">${e.hora_conf||''}</span>`}</div>`
+      lista.appendChild(d)
+    })
+    document.getElementById('st-ok').textContent=ok;document.getElementById('st-pe').textContent=pe;document.getElementById('st-pr').textContent=pr
+  })
+}
+
+window.abrirConf=async id=>{
+  const q=query(collection(fdb,'entregas'),where('motorista_id','==',sessao.id),where('data','==',hoje()))
+  const snap=await getDocs(q)
+  entregaAtual=s2a(snap).find(e=>e._id===id)
+  if(!entregaAtual)return
+  document.getElementById('conf-cli').textContent=entregaAtual.cliente
+  document.getElementById('conf-nf').textContent='NF '+entregaAtual.nf+' · '+(entregaAtual.pedido||'—')
+  const cl=document.getElementById('checklist');cl.innerHTML=''
+  CHECKLIST.forEach(c=>{const d=document.createElement('div');d.className='item-chk'+(c.w?' atencao':'');d.setAttribute('onclick','marcarItem(this)');d.innerHTML=`<div class="caixinha"></div><div class="item-txt">${c.t}</div>`;cl.appendChild(d)})
+  document.getElementById('tipo-oc').value='';document.getElementById('obs-oc').style.display='none';document.getElementById('obs-oc').value=''
+  limparSig();irTela('confirmar');setTimeout(initSig,150)
+}
+
+window.confirmarEntrega=async()=>{
+  if(!entregaAtual)return
+  const oc=document.getElementById('tipo-oc').value
+  const ob=document.getElementById('obs-oc').value.trim()
+  const h=agora()
+  setBusy('btn-confirmar',true)
+  await updateDoc(doc(fdb,'entregas',entregaAtual._id),{status:oc?'prob':'ok',ocorrencia:oc,obs:ob,hora_conf:h,assinatura:document.getElementById('canvas-sig').toDataURL()})
+  if(oc)await addDoc(collection(fdb,'ocorrencias'),{data:hoje(),hora:h,motorista_id:sessao.id,motorista:sessao.nome,entrega_id:entregaAtual._id,nf:entregaAtual.nf,cliente:entregaAtual.cliente,tipo:oc,obs:ob,status:'aberta',criadoEm:serverTimestamp()})
+  document.getElementById('suc-txt').innerHTML=oc?`<strong>${entregaAtual.cliente}</strong> registrada às ${h}.<br>Ocorrência: <strong>${oc}</strong>`:`<strong>${entregaAtual.cliente}</strong> confirmada às ${h}.`
+  setBusy('btn-confirmar',false);irTela('sucesso')
+}
+
+window.irPara=n=>{
+  if(n==='encerrar'){prepEncerrar();return}
+  irTela(n)
+}
+
+async function prepEncerrar(){
+  const q=query(collection(fdb,'entregas'),where('motorista_id','==',sessao.id),where('data','==',hoje()))
+  const ents=s2a(await getDocs(q))
+  const ok=ents.filter(e=>e.status==='ok').length,pr=ents.filter(e=>e.status==='prob').length,pe=ents.filter(e=>e.status==='pend').length
+  document.getElementById('enc-resumo').innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span style="color:var(--t3)">Motorista</span><strong>${sessao.nome.split(' ').slice(0,2).join(' ')}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span style="color:var(--t3)">Veículo</span><strong>${sessao.veiculo||'—'}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span style="color:var(--t3)">KM inicial</span><strong>${sessao.km_inicial||0} km</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span style="color:var(--t3)">Confirmadas</span><strong style="color:var(--gn)">${ok}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span style="color:var(--t3)">Ocorrências</span><strong style="color:var(--dr)">${pr}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:5px 0"><span style="color:var(--t3)">Pendentes</span><strong style="color:var(--am)">${pe}</strong></div>`
+  irTela('encerrar')
+}
+
+window.finalizarRota=async()=>{
+  const kmFin=parseInt(document.getElementById('km-fin').value)
+  if(isNaN(kmFin)||document.getElementById('km-fin').value.trim()==='')return alert('Informe o KM final do veículo.')
+  if(kmFin<(sessao.km_inicial||0))return alert('KM final não pode ser menor que o inicial ('+( sessao.km_inicial||0)+' km).')
+  setBusy('btn-finalizar',true)
+  const obs=document.getElementById('obs-rota').value.trim()
+  if(sessao.rota_id)await updateDoc(doc(fdb,'rotas',sessao.rota_id),{status:'concluida',km_final:kmFin,encerrada:agora(),obs})
+  if(sessao.veiculo_id){const vSnap=await getDocs(collection(fdb,'veiculos'));const vDoc=vSnap.docs.find(d=>d.id===sessao.veiculo_id);if(vDoc)await setDoc(doc(fdb,'veiculos',vDoc.id),{...vDoc.data(),status:'disponivel',km:kmFin,motorista_id:null})}
+  setBusy('btn-finalizar',false)
+  alert('Rota finalizada! KM percorrido: '+(kmFin-(sessao.km_inicial||0))+' km')
+  logout()
+}
+
+window.marcarItem=el=>{const b=el.querySelector('.caixinha');b.classList.toggle('ck');el.classList.toggle('feito',b.classList.contains('ck'))}
+window.mostrarObs=v=>{document.getElementById('obs-oc').style.display=v?'block':'none'}
+window.confirmarLogout=()=>{if(confirm('Deseja sair?\n\nSua rota continuará ativa. Ao entrar novamente com seu PIN, você voltará exatamente onde parou.')){logout()}}
+
+function initSig(){
+  const cv=document.getElementById('canvas-sig');if(!cv)return
+  cv.width=cv.offsetWidth||300;cv.height=cv.offsetHeight||130
+  sigCtx=cv.getContext('2d');sigCtx.strokeStyle='#1A1A18';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round'
+  const pos=e=>{const r=cv.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*(cv.width/r.width),y:(t.clientY-r.top)*(cv.height/r.height)}}
+  cv.onmousedown=e=>{sOn=true;const p=pos(e);sX=p.x;sY=p.y}
+  cv.onmousemove=e=>{if(!sOn)return;const p=pos(e);sigCtx.beginPath();sigCtx.moveTo(sX,sY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sX=p.x;sY=p.y}
+  cv.onmouseup=cv.onmouseleave=()=>sOn=false
+  cv.addEventListener('touchstart',e=>{e.preventDefault();sOn=true;const p=pos(e);sX=p.x;sY=p.y},{passive:false})
+  cv.addEventListener('touchmove',e=>{e.preventDefault();if(!sOn)return;const p=pos(e);sigCtx.beginPath();sigCtx.moveTo(sX,sY);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();sX=p.x;sY=p.y},{passive:false})
+  cv.addEventListener('touchend',()=>sOn=false,{passive:false})
+}
+window.limparSig=()=>{const cv=document.getElementById('canvas-sig');if(cv&&sigCtx)sigCtx.clearRect(0,0,cv.width,cv.height)}
+
+function tick(){const el=document.getElementById('rot-hora');if(el)el.textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+setInterval(tick,60000);tick()
+
+const ss=getSessao()
+if(ss){
+  sessao=ss
+  if(ss.perfil==='gestor')window.location.href='gestor.html'
+  else if(ss.perfil==='encarregado')window.location.href='encarregado.html'
+  else checkRotaAtiva(ss)
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{})
+</script>
+</body>
+</html>
